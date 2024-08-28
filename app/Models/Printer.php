@@ -1,0 +1,22 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Printer extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'name',
+        'serial_number',
+        'configuration',
+    ];
+
+    public function article()
+    {
+        return $this->belongsToMany(Article::class, 'article_printer')->withTimestamps();
+    }
+}
