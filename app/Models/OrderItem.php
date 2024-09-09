@@ -27,6 +27,6 @@ class OrderItem extends Model
 
     public function order(): BelongsTo
     {
-        return $this->belongsTo(Order::class)->withDefault();
+        return $this->belongsTo(Order::class);
     }
 }
