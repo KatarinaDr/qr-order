@@ -7,6 +7,6 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/example', function () {
+Route::get('/menu-order', function () {
     return view('manu-order');
 });

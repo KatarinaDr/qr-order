@@ -76,21 +76,21 @@
         </div>
     </div>
 
-    <h1> </h1>
 
-    <div >
-            
-        <div class="screen-buttons-container">
-    <button class="screen-button left-button" wire:click="delete" wire:confirm="Are you sure you want to order this?">Make Order</button>
-    <button class="screen-button right-button" wire:click="delete" wire:confirm="Are you sure you want to delete this order?">Cancel Order</button>
-</div>
+    <h3>Total: {{ $total }} KM</h3>
 
-            
-    </div> 
+    <div class="screen-buttons-container">
+            <button class="screen-button left-button" wire:click="confirmCancelOrder">Cancel Order</button>
+            <button class="screen-button right-button" wire:click="naruciHranu">Make Order</button>
+    </div>
+
     
-        <!-- Add Pagination -->
-        <div class="swiper-pagination"></div>
 
-        
+    @if (session()->has('message'))
+            <div class="alert alert-success">
+                {{ session('message') }}
+            </div>
+    @endif
+    
     
 </div>

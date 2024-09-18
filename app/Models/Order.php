@@ -22,6 +22,6 @@ class Order extends Model
 
     public function orderItems(): HasMany
     {
-        return $this->hasMany(OrderItem::class)->withTimestamp();
+        return $this->hasMany(OrderItem::class);
     }
 }

@@ -5,6 +5,8 @@ namespace App\Livewire;
 use Livewire\Component;
 use App\Models\Category;
 use App\Models\Article;
+use App\Models\Order;
+use App\Models\OrderItem;
 use Illuminate\Console\View\Components\Info;
 
 use function PHPUnit\Framework\isEmpty;
@@ -13,18 +15,29 @@ class CategoryArticles extends Component
 {
     public $categories;
     public $selectedCategory = null;
+
     public $articles = [];
     public $niz = [];
     public $orderList;
     public $order = [];
+
     public $articleId=0;
     public $articleTitle;
     public int $table = 1;
     public int $quantity = 1;
 
+    public $dbOrder;
+    //public OrderItem $dbOrderItem;
+
     public $i = 0;
 
+    //Total = tatal cost of order
+
+    public float $total = 0;
+
     public int $inputValue = 0;
+
+    protected $listeners = ['cancelOrder'];
 
     public function mount()
     {
@@ -47,6 +60,8 @@ class CategoryArticles extends Component
 
     public function addToDestination($rowId)
     {
+        $this->total = 0;
+
         // Find the row by ID
         $row = collect($this->articles)->firstWhere('id', $rowId);
         
@@ -58,13 +73,85 @@ class CategoryArticles extends Component
                 //$this->order->put($row['id']);
                 //$this->order->put($row['title']);
                 //if(!collect($this->order)->contains('id', $rowId))
-                $this->order[] = collect(['id' => $this->i,'article_id' => $this->niz[0]['id'], 'title' => $this->niz[0]['title'], 'table' => $this->table, 'quantity' => $this->quantity]);
+                $this->order[] = collect([
+                    'id' => $this->i,
+                    'article_id' => $this->niz[0]['id'],
+                    'title' => $this->niz[0]['title'],
+                    'price' => $this->niz[0]['price'],
+                    'table' => $this->table,
+                    'quantity' => $this->quantity
+                ]);
                 $this->i+=1;
                 $this->niz = [];
                 //$this->order[0]['quantity']+=1;
+
+                $this->total();
+            }
+            else
+                $this->total();
+        }
+        else
+            $this->total();
+
+    }
+
+    public function total()
+    {
+        foreach($this->order as $article)
+            {
+                $this->total += $article['price']*$article['quantity'];
+            }
+    }
+
+    //Function for adding orders into DB
+    public function naruciHranu()
+    {
+        if(!empty($this->order))
+        {
+            Order::create([
+                'customer' => 'Admin',
+                'table' => 2,
+            ]);
+    
+            $this->dbOrder = Order::latest()->first();
+    
+            // Dump the inserted data to check
+            //dd(Order::latest()->first());
+    
+            $this->dispatch('orderPlaced', 'Order is on the way!');
+    
+            foreach($this->order as $article)
+            {
+                OrderItem::create([
+                    'order_id' => $this->dbOrder->id,
+                    'article_id' => $article['article_id'],
+                    'title' => $article['title'],
+                    'price' => $article['price'],
+                    'quantity' => $article['quantity']
+                ]);
             }
         }
+        else
+        {
+            $this->dispatch('orderEmpty', 'Your order list is empty!');
+        }
 
+    }
+
+    public function confirmCancelOrder()
+    {
+        $this->dispatch('cancelOrderPopup'); // Emit the popup event
+    }
+
+    public function cancelOrder()
+    {
+        //foreach($this->order as $item) {
+        //    unset($item);
+        //}
+        array_splice($this->order,0,count($this->order));
+        $this->i=0;
+
+        $this->total = 0;
     }
 
     public function loadCategories()
@@ -82,14 +169,29 @@ class CategoryArticles extends Component
 
     public function increase($rowId)
     {
+        $this->total = 0;
+
         if($this->order[$rowId]['quantity']<25)
-        $this->order[$rowId]['quantity']+=1;
+        {
+            $this->order[$rowId]['quantity']+=1;
+            $this->total();
+        }
+        else
+        {
+            $this->total();
+        }
+        
     }
 
     public function decrease($rowId)
     {
+        $this->total = 0;
+
         if($this->order[$rowId]['quantity']>1)
+        {
             $this->order[$rowId]['quantity']-=1;
+            $this->total();
+        }    
         else
         {
             $j=0;
@@ -103,6 +205,8 @@ class CategoryArticles extends Component
             $this->i = count($this->order);
             if(empty($this->order))
                 $this->i=0;
+
+            $this->total();
         }
     }
 

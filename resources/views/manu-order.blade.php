@@ -9,11 +9,14 @@
         <!-- Swiper CSS -->
         <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css">
 
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
         <!-- Custom Styles -->
         <style>
             body {
                 background-color: #2c2c2c; /* Dark grey background */
-                background-image: url('path-to-your-background-image.jpg'); /* Optional: Add a background image */
+                /*background-image: url('path-to-your-background-image.jpg'); /* Optional: Add a background image */
                 background-size: cover;
                 background-attachment: fixed;
                 color: #ffffff;
@@ -233,19 +236,19 @@
                 transition: background-color 0.3s ease;
             }
 
-            .left-button {
+            .right-button {
                 background-color: #cc6600; /* Very dark orange for left button */
             }
 
-            .left-button:hover {
+            .right-button:hover {
                 background-color: #ff8c00; /* Lighter orange on hover */
             }
 
-            .right-button {
+            .left-button {
                 background-color: #ff0000; /* Red for the right button */
             }
 
-            .right-button:hover {
+            .left-button:hover {
                 background-color: #e60000; /* Darker red on hover */
             }
 
@@ -281,6 +284,46 @@
 
         <!-- Initialize Swiper -->
         <script>
+                Livewire.on('orderPlaced', message => {
+                    Swal.fire({
+                        title: 'Success!',
+                        text: message,
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                    });
+                });
+                
+                Livewire.on('orderEmpty', message => {
+                    Swal.fire({
+                        title: 'Empty!',
+                        text: message,
+                        icon: 'warning',
+                        confirmButtonText: 'OK'
+                    });
+                });
+
+                Livewire.on('cancelOrderPopup', () => {
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: "Do you want to cancel the order?",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Yes, cancel it!',
+                        cancelButtonText: 'No, keep it'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            Livewire.dispatch('cancelOrder'); // Calls the Livewire method to cancel the order
+                            Swal.fire(
+                                'Canceled!',
+                                'Your order has been canceled.',
+                                'success'
+                            );
+                        }
+                    });
+                });
+
               var swiper = new Swiper('.category-swiper', {
                 slidesPerView: 3, // Show up to 3 slides at a time
                 spaceBetween: 10, // Space between slides
