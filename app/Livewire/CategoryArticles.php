@@ -8,6 +8,8 @@ use App\Models\Article;
 use App\Models\Order;
 use App\Models\OrderItem;
 use Illuminate\Console\View\Components\Info;
+use Illuminate\Support\Facades\Http; // Import the Http facade
+use Illuminate\Support\Facades\Log;
 
 use function PHPUnit\Framework\isEmpty;
 
@@ -129,6 +131,30 @@ class CategoryArticles extends Component
                     'price' => $article['price'],
                     'quantity' => $article['quantity']
                 ]);
+            }
+
+            // Convert the order array to JSON string
+            $orderJson1 = escapeshellarg(json_encode($this->order));
+
+            $orderJson = '[{"title": "Article 1", "quantity": 2, "price": 15.00}, {"title": "Article 2", "quantity": 1, "price": 25.00}, {"title": "Article 3", "quantity": 3, "price": 10.00}]';
+
+            // Define the path to your Python script
+            $pythonScriptPath = base_path('app/Scripts/print_order_script.py'); // Ensure the path is correct
+
+            // Execute the Python script and pass the serialized order array as an argument
+            $command = "python3 app/Script/print_order_script.py $orderJson";
+
+            // Run the command
+            $output = shell_exec($command);
+
+            // Log the output for debugging
+            Log::info('Python script output: ' . $output);
+
+            // Handle the output if needed
+            if ($output) {
+                session()->flash('message', 'Order sent successfully!');
+            } else {
+                session()->flash('error', 'Failed to send the order.');
             }
         }
         else
