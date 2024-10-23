@@ -12,5 +12,5 @@ Route::get('/menu-order', function () {
     return view('manu-order');
 });
 
-Route::post('/print-order', [OrderController::class, 'printOrder'])->name('print.order');
+//Route::post('/print-order', [OrderController::class, 'printOrder'])->name('print.order');
 

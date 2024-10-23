@@ -7,9 +7,9 @@ use App\Models\Category;
 use App\Models\Article;
 use App\Models\Order;
 use App\Models\OrderItem;
-use Illuminate\Console\View\Components\Info;
-use Illuminate\Support\Facades\Http; // Import the Http facade
-use Illuminate\Support\Facades\Log;
+
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Http;
 
 use function PHPUnit\Framework\isEmpty;
 
@@ -39,6 +39,10 @@ class CategoryArticles extends Component
 
     public int $inputValue = 0;
 
+    public $orderItem;
+
+    
+
     protected $listeners = ['cancelOrder'];
 
     public function mount()
@@ -46,6 +50,10 @@ class CategoryArticles extends Component
         $this->categories = Category::all();
         $this->articles = Category::find(1)->article;
         $this->orderList = collect();
+        $this->table = request()->table;
+
+        $this->orderItem = json_encode(OrderItem::where('order_id','55')->get());
+        
         
         //$this->selectedCategory = Category::first();
         
@@ -81,7 +89,8 @@ class CategoryArticles extends Component
                     'title' => $this->niz[0]['title'],
                     'price' => $this->niz[0]['price'],
                     'table' => $this->table,
-                    'quantity' => $this->quantity
+                    'quantity' => $this->quantity,
+                    'total' => $this->total
                 ]);
                 $this->i+=1;
                 $this->niz = [];
@@ -110,9 +119,14 @@ class CategoryArticles extends Component
     {
         if(!empty($this->order))
         {
+            $ip = request()->ip();
+
+            $mac = shell_exec("arp -a $ip");
+
             Order::create([
-                'customer' => 'Admin',
-                'table' => 2,
+                'customer' => $mac,
+                'table' => $this->table,
+                'total' => $this->total
             ]);
     
             $this->dbOrder = Order::latest()->first();
@@ -129,33 +143,37 @@ class CategoryArticles extends Component
                     'article_id' => $article['article_id'],
                     'title' => $article['title'],
                     'price' => $article['price'],
-                    'quantity' => $article['quantity']
+                    'quantity' => $article['quantity'],
+                    'table' => $this->table,
+                    'total' => $this->total
                 ]);
             }
 
+            //$orderJson = '[{"title": "Article 1", "quantity": 2, "price": 15.00}, {"title": "Article 2", "quantity": 1, "price": 25.00}, {"title": "Article 3", "quantity": 3, "price": 10.00}]';
+
             // Convert the order array to JSON string
-            $orderJson1 = escapeshellarg(json_encode($this->order));
+            //$orderJson = json_encode($this->order, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 
-            $orderJson = '[{"title": "Article 1", "quantity": 2, "price": 15.00}, {"title": "Article 2", "quantity": 1, "price": 25.00}, {"title": "Article 3", "quantity": 3, "price": 10.00}]';
+            /*
 
-            // Define the path to your Python script
-            $pythonScriptPath = base_path('app/Scripts/print_order_script.py'); // Ensure the path is correct
+            // Escape the JSON string for shell command
+            $escapedOrderJson = escapeshellarg($orderJson);
 
-            // Execute the Python script and pass the serialized order array as an argument
-            $command = "python3 app/Script/print_order_script.py $orderJson";
+            try {
+                // Call the Artisan command with the order as an argument
+                Artisan::call('order:print', [
+                    'order' => $orderJson1
+                ]);
 
-            // Run the command
-            $output = shell_exec($command);
+                // Optionally, capture the output
+                $output = Artisan::output();
 
-            // Log the output for debugging
-            Log::info('Python script output: ' . $output);
 
-            // Handle the output if needed
-            if ($output) {
-                session()->flash('message', 'Order sent successfully!');
-            } else {
-                session()->flash('error', 'Failed to send the order.');
+            } catch (\Exception $e) {
+                // Flash an error message
+                session()->flash('error', 'Failed to send the order: ' . $e->getMessage());
             }
+                */
         }
         else
         {

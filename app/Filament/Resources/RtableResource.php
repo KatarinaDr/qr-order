@@ -31,7 +31,7 @@ class RtableResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('number')
-                    ->required()
+                    //->required()
                     ->numeric(),
                 Forms\Components\TextInput::make('web_page')
                     ->required()

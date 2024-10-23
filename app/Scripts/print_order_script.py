@@ -7,11 +7,13 @@ from datetime import datetime
 articles_json = sys.argv[1]
 articles = json.loads(articles_json)
 
+table_number = articles[0]["table"]
+
 # Array of printer MAC addresses
-printer_macs = ["60:6E:41:62:DE:20", "60:6E:41:62:DE:1F"]  # Modify as needed
+printer_macs = ["60:6E:41:62:DE:1F"]  # Modify as needed "60:6E:41:62:DE:20", 
 
 # Get current date
-current_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+current_date = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
 # Function to print articles to a Bluetooth printer
 def print_to_printer(printer_mac, articles):
@@ -27,19 +29,21 @@ def print_to_printer(printer_mac, articles):
         sock.send("\n")
         sock.send("--------------------------------")
         sock.send("\n")
-        sock.send("Naziv    Kolicina    Cijena")
+        message = f"Narudzba za sto broj: {table_number}"
+        sock.send(message.encode('utf-8'))  # Ensure the message is encoded to bytes
         sock.send("\n")
 
         # Print article details
         for article in articles:
-            sock.send(f"{article['title']}  x{article['quantity']}  ${article['price']}\n")
+            sock.send(f"{article['title']}\n")
+            sock.send(f"Kolicina: {article['quantity']}x    Cijena: {article['price']}KM\n")
 
         # Print the total amount
         total_price = sum(item['quantity'] * item['price'] for item in articles)
         sock.send("\n")
         sock.send("--------------------------------")
         sock.send("\n")
-        sock.send(f"Total: ${total_price:.2f}\n")
+        sock.send(f"Total: {total_price:.2f}KM\n")
 
         # Paper cut buffer
         sock.send("\n\n\n")

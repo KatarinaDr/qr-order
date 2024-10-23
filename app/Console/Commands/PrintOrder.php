@@ -52,7 +52,7 @@ class PrintOrder extends Command
         $process = new Process([$pythonExecutable, $pythonScriptPath, $orderJson]);
 
         // Optional: Set a timeout (in seconds)
-        $process->setTimeout(60);
+        $process->setTimeout(8);
 
         try {
             // Start and wait for the process to finish

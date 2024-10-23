@@ -9,7 +9,9 @@ use App\Console\Commands\PrintOrder;
 class Kernel extends ConsoleKernel
 {
     protected $commands = [
-        PrintOrder::class,
+        \App\Console\Commands\PrintOrder::class,
+        \App\Console\Commands\SeedRolesAndPermissions::class,
+        \App\Console\Commands\CreateUser::class,
     ];
 
     protected function schedule(Schedule $schedule)

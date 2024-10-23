@@ -31,7 +31,7 @@
                         {{ Str::limit($article->description, 1000) }} <!-- Limit content length for preview -->
                         <div></div>
                         Price: 
-                        {{ Str::limit($article->price) }} <!-- Limit content length for preview -->
+                        {{ Str::limit($article->price) }}KM <!-- Limit content length for preview -->
                     </div>
                     
                     <div class="article-card-footer">
@@ -81,7 +81,7 @@
 
     <div class="screen-buttons-container">
             <button class="screen-button left-button" wire:click="confirmCancelOrder">Cancel Order</button>
-            <button class="screen-button right-button" wire:click="naruciHranu">Make Order</button>
+            <button class="screen-button right-button" wire:click="naruciHranu" onclick="disableButtonFor4Seconds(this)">Make Order</button>
     </div>
 
     

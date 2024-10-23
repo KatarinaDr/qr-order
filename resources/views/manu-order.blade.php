@@ -284,13 +284,34 @@
 
         <!-- Initialize Swiper -->
         <script>
+
+                function disableButtonFor4Seconds(button) {
+                        button.disabled = true;
+                        setTimeout(() => {
+                            button.disabled = false;
+                        }, 4000);
+                    } 
+
                 Livewire.on('orderPlaced', message => {
-                    Swal.fire({
-                        title: 'Success!',
-                        text: message,
-                        icon: 'success',
-                        confirmButtonText: 'OK'
-                    });
+                    
+                            // Disable the OK button for 4 seconds
+                        Swal.fire({
+                            title: 'Success!',
+                            text: message,
+                            icon: 'success',
+                            confirmButtonText: 'OK',
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                            didOpen: () => {
+                                // Disable the OK button for 4 seconds
+                                Swal.showLoading(); // Show loading indicator for 4 seconds
+                                setTimeout(() => {
+                                    Swal.hideLoading(); // Hide loading after 4 seconds
+                                    Swal.enableButtons(); // Enable the OK button after 4 seconds
+                                }, 4000);
+                            }
+                        });
+
                 });
                 
                 Livewire.on('orderEmpty', message => {
