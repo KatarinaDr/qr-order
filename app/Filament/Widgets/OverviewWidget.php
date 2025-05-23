@@ -7,6 +7,7 @@ use App\Models\Rtable;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use DateTime;
+use Illuminate\Support\Facades\Auth;
 
 class OverviewWidget extends BaseWidget
 {
@@ -19,22 +20,28 @@ class OverviewWidget extends BaseWidget
         $dailyArticlesCounts = $this->getDailyCounts(Article::class);
         $dailyTablesCounts = $this->getDailyCounts(Rtable::class);
 
-        return [
-            Stat::make('Number of articles:', Article::count())
-                ->description('Articles')
+        $stats = [
+            Stat::make('Broj artikala:', Article::count())
+                ->description('Artikli')
                 ->color('success')
-                ->icon('heroicon-o-users')
+                ->icon('heroicon-o-shopping-bag')
                 ->chart($dailyArticlesCounts)
                 ->chartColor('success'),
 
-            Stat::make('Number of tables:', Rtable::count())
-                ->description('Tables')
+            Stat::make('Broj stolova:', Rtable::count())
+                ->description('Stolovi')
                 ->color('info')
                 ->icon('heroicon-o-building-office')
                 ->chart($dailyTablesCounts)
                 ->chartColor('info'),
-
         ];
+
+        $user = Auth::user();
+        if ($user && $user->role && $user->role->name !== 'super_admin') {
+            $stats[] = $this->getLicenseStat();
+        }
+
+        return $stats;
     }
 
     private function getMonthlyCounts($modelClass): array
@@ -86,5 +93,20 @@ class OverviewWidget extends BaseWidget
         return array_map(function ($day) use ($dailyCounts) {
             return $dailyCounts[$day] ?? 0;
         }, $allDays);
+    }
+
+    private function getLicenseStat(): Stat
+    {
+        $user = Auth::user();
+
+        $now = now();
+        $expiresAt = \Carbon\Carbon::parse($user->license_expires_at);
+
+        $daysRemaining = $now->startOfDay()->diffInDays($expiresAt->startOfDay());
+
+        return Stat::make('Licenca', "{$daysRemaining} dana")
+            ->description('Do isteka licence')
+            ->color($daysRemaining <= 7 ? 'warning' : 'success')
+            ->icon('heroicon-o-clock');
     }
 }

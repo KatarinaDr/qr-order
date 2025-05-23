@@ -12,6 +12,8 @@ class Kernel extends ConsoleKernel
         \App\Console\Commands\PrintOrder::class,
         \App\Console\Commands\SeedRolesAndPermissions::class,
         \App\Console\Commands\CreateUser::class,
+        \App\Console\Commands\PrintUsbOrder::class,
+        \App\Console\Commands\SeedAllDataCommand::class,
     ];
 
     protected function schedule(Schedule $schedule)
@@ -25,4 +27,8 @@ class Kernel extends ConsoleKernel
 
         require base_path('routes/console.php');
     }
+
+    protected $routeMiddleware = [
+        'check.qr.session' => \App\Http\Middleware\CheckQrSession::class,
+    ];
 }

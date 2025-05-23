@@ -19,11 +19,6 @@ class PrinterResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    public static function canAccess(): bool
-    {
-        return auth()->user()->hasPermission('category_printer_admin');
-    }
-
     public static function form(Form $form): Form
     {
         return $form
@@ -31,9 +26,13 @@ class PrinterResource extends Resource
                 Forms\Components\TextInput::make('name')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('serial_number')
-                    ->required(),
-                Forms\Components\TextInput::make('configuration')
+                Forms\Components\TextInput::make('printer_name')
+                    ->required()
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('mac_address')
+                    ->required()
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('interface')
                     ->required()
                     ->maxLength(255),
             ]);
@@ -45,8 +44,11 @@ class PrinterResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('serial_number'),
-                Tables\Columns\TextColumn::make('configuration')
+                Tables\Columns\TextColumn::make('printer_name')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('mac_address')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('interface')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()

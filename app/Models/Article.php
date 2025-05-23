@@ -26,7 +26,7 @@ class Article extends Model
     {
         return $this->belongsToMany(Printer::class, 'article_printer')->withTimestamps();
     }
-    
+
     public function category()
     {
         return $this->belongsToMany(Category::class, 'article_category')->withTimestamps();

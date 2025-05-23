@@ -84,7 +84,8 @@ class ArticleResource extends Resource
                     ])->columnSpan(1),
                 Forms\Components\FileUpload::make('image_url')
                     ->label('image')
-                    ->disabled(true)
+                    ->image()
+                    //->disabled(true)
                     ->preserveFilenames(),
             ]);
     }
@@ -102,10 +103,10 @@ class ArticleResource extends Resource
                     ->suffix(' KM')
                     //->money()
                     ->sortable(),
-                Tables\Columns\ImageColumn::make('image_url')
+                /*Tables\Columns\ImageColumn::make('image_url')
                     //->disabledOn('edit')
                     ->disableClick(true)
-                    ->label('image'),
+                    ->label('image'),*/
                 Tables\Columns\TagsColumn::make('category.name'),
                 //Tables\Columns\TagsColumn::make('tags'),
                 Tables\Columns\TagsColumn::make('printer.name')

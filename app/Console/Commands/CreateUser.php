@@ -5,7 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Models\User;
 use App\Models\Role;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Str;
 
 class CreateUser extends Command
 {
@@ -21,50 +21,67 @@ class CreateUser extends Command
      *
      * @var string
      */
-    protected $description = 'Create a new user and assign a role';
+    protected $description = 'Create predefined super_admin and manager users';
 
     /**
      * Execute the console command.
      */
     public function handle()
     {
-        $this->line('<fg=blue>Creating a new user...</>');
+        $this->line('<fg=blue>Creating predefined users...</>');
 
-        $email = $this->ask('Enter user email');
-        $user = User::where('email', $email)->first();
+        $users = [
+            [
+                'email' => 'admin@admin.com',
+                'name' => 'Admin',
+                'password' => 'admin',
+                'role_name' => 'super_admin',
+            ],
+            [
+                'email' => 'manager@manager.com',
+                'name' => 'Manager',
+                'password' => 'manager',
+                'role_name' => 'manager',
+            ],
+        ];
 
-        if ($user) {
-            $this->line("<fg=yellow>User with email '{$email}' already exists. Updating details...</>");
-            $name = $this->ask('Enter user name');
-            $password = $this->secret('Enter user password');
-            $roles = Role::pluck('name')->toArray();
-            $roleName = $this->choice('Choose a role for the user', $roles);
+        foreach ($users as $userData) {
+            $user = User::where('email', $userData['email'])->first();
+            $role = Role::where('name', $userData['role_name'])->first();
 
-            $role = Role::where('name', $roleName)->first();
+            if (!$role) {
+                $this->line("<fg=red>Role '{$userData['role_name']}' does not exist. Skipping user '{$userData['email']}'.</>");
+                continue;
+            }
 
-            $user->update([
-                'name' => $name,
-                'password' => bcrypt($password),
-                'role_id' => $role->id,
-            ]);
+            if ($user) {
+                $this->line("<fg=yellow>User with email '{$userData['email']}' already exists. Updating details...</>");
 
-            $this->line("<fg=green>User '{$user->name}' updated successfully with role '{$role->name}'.</>");
+                $user->update([
+                    'name' => $userData['name'],
+                    'password' => bcrypt($userData['password']),
+                    'role_id' => $role->id,
+                    'license_key' => Str::random(5),
+                    'is_active' => true,
+                    'can_access_dashboard' => true,
+                ]);
 
-        } else {
-            $name = $this->ask('Enter user name');
-            $password = $this->secret('Enter user password');
-            $roles = Role::pluck('name')->toArray();
-            $roleName = $this->choice('Choose a role for the user', $roles);
-            $role = Role::where('name', $roleName)->first();
+                $this->line("<fg=green>User '{$user->name}' updated successfully with role '{$role->name}'.</>");
+            } else {
+                $user = User::create([
+                    'name' => $userData['name'],
+                    'email' => $userData['email'],
+                    'password' => bcrypt($userData['password']),
+                    'role_id' => $role->id,
+                    'license_key' => Str::random(5),
+                    'is_active' => true,
+                    'can_access_dashboard' => true,
+                ]);
 
-            $user = User::create([
-                'name' => $name,
-                'email' => $email,
-                'password' => bcrypt($password),
-                'role_id' => $role->id,
-            ]);
-
-            $this->line("<fg=green>User '{$user->name}' created successfully with role '{$role->name}'.</>");
+                $this->line("<fg=green>User '{$user->name}' created successfully with role '{$role->name}'.</>");
+            }
         }
+
+        $this->line('<fg=blue>All predefined users processed successfully!</>');
     }
 }

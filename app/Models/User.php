@@ -21,7 +21,11 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role_id'
+        'role_id',
+        'license_key',
+        'is_active',
+        'can_access_dashboard',
+        'license_expires_at',
     ];
 
     /**
@@ -44,6 +48,9 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
+            'can_access_dashboard' => 'boolean',
+            'license_expires_at' => 'datetime',
         ];
     }
 
@@ -64,4 +71,18 @@ class User extends Authenticatable
 
         return $this->role->permissions()->pluck('name')->contains($permission);
     }
+    protected static function booted()
+    {
+        static::saving(function ($user) {
+            if ($user->isDirty('is_active') && $user->is_active === true) {
+                $user->license_expires_at = now()->addDays(30);
+            }
+
+            if ($user->is_active && $user->license_expires_at && $user->license_expires_at->isPast()) {
+                $user->is_active = false;
+                $user->saveQuietly();
+            }
+        });
+    }
+
 }

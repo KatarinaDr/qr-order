@@ -11,8 +11,9 @@ class Printer extends Model
 
     protected $fillable = [
         'name',
-        'serial_number',
-        'configuration',
+        'printer_name',
+        'mac_address',
+        'interface',
     ];
 
     public function article()

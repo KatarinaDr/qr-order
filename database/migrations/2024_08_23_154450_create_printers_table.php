@@ -14,8 +14,9 @@ return new class extends Migration
         Schema::create('printers', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('serial_number');
-            $table->string('configuration')->nullable();
+            $table->string('printer_name');
+            $table->string('mac_address');
+            $table->string('interface');
             $table->timestamps();
         });
     }

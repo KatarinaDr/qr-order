@@ -19,6 +19,7 @@ return new class extends Migration
             $table->integer('table')->nullable();
             $table->integer('sifra')->nullable();
             $table->float('price');
+            $table->string('printer');
             $table->float('total')->nullable();
             $table->integer('quantity');
             $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade');

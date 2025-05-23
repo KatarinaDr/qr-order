@@ -2,23 +2,24 @@
 
 namespace App\Livewire;
 
+use App\Models\Rtable;
 use Livewire\Component;
 use App\Models\Category;
 use App\Models\Article;
 use App\Models\Order;
 use App\Models\OrderItem;
 
-use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Http;
-
-use function PHPUnit\Framework\isEmpty;
+use Livewire\WithPagination;
 
 class CategoryArticles extends Component
 {
+
+    use WithPagination;
     public $categories;
     public $selectedCategory = null;
 
-    public $articles = [];
+    public $page = 1;
+    protected $queryString = ['page'];
     public $niz = [];
     public $orderList;
     public $order = [];
@@ -41,24 +42,33 @@ class CategoryArticles extends Component
 
     public $orderItem;
 
-    
+    public $selectedArticle = null;
 
     protected $listeners = ['cancelOrder'];
 
     public function mount()
     {
         $this->categories = Category::all();
-        $this->articles = Category::find(1)->article;
+       // $this->articles = Category::find(1)->article;
+        $this->selectedCategory = 1;
         $this->orderList = collect();
         $this->table = request()->table;
 
         $this->orderItem = json_encode(OrderItem::where('order_id','55')->get());
-        
-        
-        //$this->selectedCategory = Category::first();
-        
     }
 
+    public function showArticle($articleId)
+    {
+        $this->selectedArticle = Article::findOrFail($articleId);
+    }
+    public function backToList()
+    {
+        $this->selectedArticle = null;
+    }
+
+    public function getPage(){
+        return request()->query('page', 1);
+    }
     public $result;
 
     public function processInteger()
@@ -73,8 +83,7 @@ class CategoryArticles extends Component
         $this->total = 0;
 
         // Find the row by ID
-        $row = collect($this->articles)->firstWhere('id', $rowId);
-        
+        $row = Article::find($rowId);
 
         if ($row) {
             // Add the row to the destination table if not already added
@@ -88,6 +97,8 @@ class CategoryArticles extends Component
                     'article_id' => $this->niz[0]['id'],
                     'title' => $this->niz[0]['title'],
                     'price' => $this->niz[0]['price'],
+                    'image_url' => $this->niz[0]['image_url'],
+                    'printer' => Article::find($this->niz[0]['id'])->printer->pluck('mac_address')[0],
                     'table' => $this->table,
                     'quantity' => $this->quantity,
                     'total' => $this->total
@@ -103,7 +114,6 @@ class CategoryArticles extends Component
         }
         else
             $this->total();
-
     }
 
     public function total()
@@ -119,6 +129,15 @@ class CategoryArticles extends Component
     {
         if(!empty($this->order))
         {
+
+            $rtable = Rtable::where('number', $this->table)->first();
+
+            if(!$rtable || !$rtable->is_active){
+                $this->dispatch('tableInactive', 'Table is inactive. Cannot place order.');
+                return;
+            }
+
+
             $ip = request()->ip();
 
             $mac = shell_exec("arp -a $ip");
@@ -128,14 +147,14 @@ class CategoryArticles extends Component
                 'table' => $this->table,
                 'total' => $this->total
             ]);
-    
+
             $this->dbOrder = Order::latest()->first();
-    
+
             // Dump the inserted data to check
             //dd(Order::latest()->first());
-    
+
             $this->dispatch('orderPlaced', 'Order is on the way!');
-    
+
             foreach($this->order as $article)
             {
                 OrderItem::create([
@@ -145,9 +164,14 @@ class CategoryArticles extends Component
                     'price' => $article['price'],
                     'quantity' => $article['quantity'],
                     'table' => $this->table,
-                    'total' => $this->total
+                    'total' => $this->total,
+                    'printer' => $article['printer']
                 ]);
             }
+
+            $this->order = [];
+            $this->i = 0;
+            $this->total = 0;
 
             //$orderJson = '[{"title": "Article 1", "quantity": 2, "price": 15.00}, {"title": "Article 2", "quantity": 1, "price": 25.00}, {"title": "Article 3", "quantity": 3, "price": 10.00}]';
 
@@ -224,7 +248,7 @@ class CategoryArticles extends Component
         {
             $this->total();
         }
-        
+
     }
 
     public function decrease($rowId)
@@ -235,7 +259,7 @@ class CategoryArticles extends Component
         {
             $this->order[$rowId]['quantity']-=1;
             $this->total();
-        }    
+        }
         else
         {
             $j=0;
@@ -267,12 +291,13 @@ class CategoryArticles extends Component
         $this->i = count($this->order);
         if(empty($this->order))
             $this->i=0;
-        
+
     }
 
     public function save($articleId)
-    { 
-        $this->articles = Category::find($articleId)->article;
+    {
+        $this->selectedCategory = $articleId;
+        $this->resetPage();
     }
 
     public function add()
@@ -283,6 +308,26 @@ class CategoryArticles extends Component
 
     public function render()
     {
-        return view('livewire.category-articles');
+        if ($this->selectedCategory) {
+            $this->articles = Article::whereHas('category', function ($query) {
+                $query->where('categories.id', $this->selectedCategory);
+            })->paginate(6)->withQueryString();
+        } else {
+            $this->articles = Article::paginate(6)->withQueryString();
+        }
+
+        if ($this->selectedArticle) {
+            return view('livewire.single-article-card', [
+                'article' => $this->selectedArticle
+            ])->layout('layouts.app');
+        }
+
+        return view('livewire.category-articles', [
+            'categories' => $this->categories,
+            'articles' => $this->articles,
+            'order' => $this->order,
+            'total' => $this->total,
+        ])->layout('layouts.app');
     }
+
 }

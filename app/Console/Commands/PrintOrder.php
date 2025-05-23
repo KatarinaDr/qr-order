@@ -56,7 +56,9 @@ class PrintOrder extends Command
 
         try {
             // Start and wait for the process to finish
-            $process->run();
+            $process->start();
+	    
+	    $process->wait();
 
             // Check if the process was successful
             if (!$process->isSuccessful()) {

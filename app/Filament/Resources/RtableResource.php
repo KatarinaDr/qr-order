@@ -47,14 +47,19 @@ class RtableResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('number')
                     ->numeric()
+                    ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('web_page')
-                    ->searchable(),
+                Tables\Columns\TextColumn::make('web_page'),
+                   // ->searchable(),
                 Tables\Columns\ToggleColumn::make('is_active')
                     ->onIcon('heroicon-m-user')
                     ->offIcon('heroicon-m-user')
                     ->onColor('success')
                     ->offColor('danger')
+                    ->afterStateUpdated(function ($record, $state) {
+                        $record->is_active = $state;
+                        $record->save();
+                    })
                     ->inline(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
@@ -71,14 +76,14 @@ class RtableResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make(),
 
-                Tables\Actions\Action::make('View QR Code') 
+                Tables\Actions\Action::make('View QR Code')
                     ->label('QR code')
                     //->color('success')
                     ->icon('heroicon-o-qr-code')
                     ->url(fn (Rtable $record) => static::getUrl('qr-code',[$record])),
-                    //->openUrlInNewTab(), 
+                    //->openUrlInNewTab(),
 
-                Tables\Actions\Action::make('Download') 
+                Tables\Actions\Action::make('Download')
                     ->label('PDF')
                     ->color('success')
                     ->icon('heroicon-o-document')

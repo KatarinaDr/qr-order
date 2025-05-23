@@ -9,8 +9,10 @@ articles = json.loads(articles_json)
 
 table_number = articles[0]["table"]
 
+mac_address = articles[0]["printer"]
+
 # Array of printer MAC addresses
-printer_macs = ["60:6E:41:62:DE:1F"]  # Modify as needed "60:6E:41:62:DE:20", 
+printer_macs = [mac_address]  # Modify as needed "60:6E:41:62:DE:20", "60:6E:41:62:DE:1F"
 
 # Get current date
 current_date = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
@@ -44,6 +46,8 @@ def print_to_printer(printer_mac, articles):
         sock.send("--------------------------------")
         sock.send("\n")
         sock.send(f"Total: {total_price:.2f}KM\n")
+        sock.send("\n")
+        sock.send("\n")
 
         # Paper cut buffer
         sock.send("\n\n\n")
