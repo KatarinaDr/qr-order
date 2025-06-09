@@ -20,52 +20,57 @@ class ArticleResource extends Resource
 {
     protected static ?string $model = Article::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
 
     public static ?bool $imageStatus = true;
-
-    public static function canAccess(): bool
-    {
-        return auth()->user()->hasPermission('article_table_admin');
-    }
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('title')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\MarkdownEditor::make('description')
-                    ->required()
-                    ->maxLength(60000)
-                    ->hint('Description of dish')
-                    ->hintColor('primary')
-                    ->columnSpan(2),
-                Forms\Components\TextInput::make('price')
-                    ->numeric()
-                    ->inputMode('decimal')
-                    ->stripCharacters(',')
-                    ->prefix('KM')
-                    ->default(0.00)
-                    ->minValue(0.1)
-                    ->maxValue(99999.99),
-                Forms\Components\Toggle::make('is_active')
-                    ->inline(false)
-                    ->default(true)
-                    ->required(),
-/*                Forms\Components\TagsInput::make('tags')
-                    ->hintIcon('heroicon-m-question-mark-circle', tooltip: 'Press Enter after your tag!')
-                    ->helperText('Press Enter, Space or Tab after you type your tag!')
-                    ->splitKeys(['Enter', 'Tab'])
-                    ->suggestions([
-                        'Glavno jelo',
-                        'Predjelo',
-                        'Prilog',
-                        'Topli napitci',
-                        'Gazirana pica',
-                        'Desert'
-                        ]), */
+                Section::make('About Article')
+                    ->schema([
+                        Forms\Components\TextInput::make('title')
+                            ->required()
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('price')
+                            ->numeric()
+                            ->inputMode('decimal')
+                            ->stripCharacters(',')
+                            ->prefix('KM')
+                            ->default(0.00)
+                            ->minValue(0.1)
+                            ->maxValue(99999.99),
+
+                        Forms\Components\Repeater::make('tags')
+                            ->label('Extra Ingredients')
+                            ->schema([
+                                Forms\Components\TextInput::make('name')
+                                    ->label('Ingredient')
+                                    ->required()
+                                    ->maxLength(255),
+                            ])
+                            ->columnSpanFull()
+                            ->default([])
+                            ->addActionLabel('Add Ingredient')
+                            ->columns(1),
+
+                        Forms\Components\Toggle::make('is_active')
+                            ->inline(false)
+                            ->default(true)
+                            ->onColor('success')
+                            ->offColor('danger')
+                            ->required(),
+                    ])->columnSpan(2)
+                      ->columns(2),
+                Section::make('Image')
+                    ->schema([
+                        Forms\Components\FileUpload::make('image_url')
+                            ->image()
+                            ->disk('public')
+                            ->directory('articles')
+                            ->preserveFilenames(),
+                    ])->columns([2]),
                 Section::make('Printers')
                     ->schema([
                         Select::make('printer')
@@ -82,11 +87,12 @@ class ArticleResource extends Resource
                         ->relationship('category','name')
                         ->preload(),
                     ])->columnSpan(1),
-                Forms\Components\FileUpload::make('image_url')
-                    ->label('image')
-                    ->image()
-                    //->disabled(true)
-                    ->preserveFilenames(),
+                Forms\Components\MarkdownEditor::make('description')
+                    ->required()
+                    ->maxLength(60000)
+                    ->hint('Description of dish')
+                    ->hintColor('primary')
+                    ->columnSpan(2),
             ]);
     }
 
@@ -154,5 +160,10 @@ class ArticleResource extends Resource
             'create' => Pages\CreateArticle::route('/create'),
             'edit' => Pages\EditArticle::route('/{record}/edit'),
         ];
+    }
+
+    public static function canAccess(): bool
+    {
+        return auth()->user()->role && auth()->user()->role->name === 'manager' && auth()->user()->hasPermission('article_table_admin');
     }
 }

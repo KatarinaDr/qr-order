@@ -46,6 +46,7 @@ class UserResource extends Resource
                     ->label('Email'),
 
                 TextColumn::make('license_key')
+                    ->searchable()
                     ->label('Licencni kljuc'),
 
                 TextColumn::make('role.name')

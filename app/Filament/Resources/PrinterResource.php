@@ -17,24 +17,27 @@ class PrinterResource extends Resource
 {
     protected static ?string $model = Printer::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-printer';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('printer_name')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('mac_address')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('interface')
-                    ->required()
-                    ->maxLength(255),
+                Forms\Components\Section::make('Printer Informations')
+                ->schema([
+                    Forms\Components\TextInput::make('name')
+                        ->required()
+                        ->maxLength(255),
+                    Forms\Components\TextInput::make('printer_name')
+                        ->required()
+                        ->maxLength(255),
+                    Forms\Components\TextInput::make('mac_address')
+                        ->required()
+                        ->maxLength(255),
+                    Forms\Components\TextInput::make('interface')
+                        ->required()
+                        ->maxLength(255),
+                ])
             ]);
     }
 
@@ -86,5 +89,10 @@ class PrinterResource extends Resource
             'create' => Pages\CreatePrinter::route('/create'),
             'edit' => Pages\EditPrinter::route('/{record}/edit'),
         ];
+    }
+
+    public static function canAccess(): bool
+    {
+        return auth()->user()->role && auth()->user()->role->name === 'manager';
     }
 }

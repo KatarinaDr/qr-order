@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Article extends Model
 {
+    use HasFactory;
 
     protected $fillable = [
         'title',
@@ -31,6 +32,5 @@ class Article extends Model
     {
         return $this->belongsToMany(Category::class, 'article_category')->withTimestamps();
     }
-
 
 }

@@ -338,7 +338,7 @@
             flex-direction: column;
             align-items: center;
             margin-top: 20px;
-            margin-bottom: 100px;
+            margin-bottom: 170px;
             border-radius: 50px;
         }
 

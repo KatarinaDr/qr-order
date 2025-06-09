@@ -21,7 +21,7 @@ class OrderResource extends Resource
 {
     protected static ?string $model = Order::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-credit-card';
 
     public static function form(Form $form): Form
     {
@@ -62,7 +62,7 @@ class OrderResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                
+
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -71,12 +71,12 @@ class OrderResource extends Resource
             ])
             ->headerActions([
                 // ...
-                Tables\Actions\Action::make('Download') 
+                Tables\Actions\Action::make('Download')
                     ->label('PDF')
                     ->color('success')
                     ->icon('heroicon-o-document')
                     ->action(fn() => static::downloadTxt()),
-                    
+
 
             ]);
     }
@@ -122,5 +122,10 @@ class OrderResource extends Resource
             'create' => Pages\CreateOrder::route('/create'),
             'edit' => Pages\EditOrder::route('/{record}/edit'),
         ];
+    }
+
+    public static function canAccess(): bool
+    {
+        return auth()->user()->role && auth()->user()->role->name === 'manager';
     }
 }

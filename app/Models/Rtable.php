@@ -7,8 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Rtable extends Model
 {
+    protected $table = 'rtables';
     protected $fillable = [
         'number',
+        'code',
         'web_page',
         'is_active',
     ];

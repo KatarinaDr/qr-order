@@ -6,6 +6,7 @@ use App\Models\Article;
 use App\Models\Category;
 use App\Models\Printer;
 use App\Models\Rtable;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Illuminate\Console\Command;
 
@@ -18,10 +19,16 @@ class SeedAllDataCommand extends Command
     public function handle()
     {
         $this->info('Seeding all data...');
+
+        Schema::disableForeignKeyConstraints();
+
         $this->seedCategories();
         $this->seedPrinters();
         $this->seedTables();
         $this->seedArticles();
+
+        Schema::enableForeignKeyConstraints();
+
         $this->info('Seeding data completed successfully!');
     }
 
@@ -298,27 +305,32 @@ class SeedAllDataCommand extends Command
         $tables = [
             [
                 'number' => 1,
-                'web_page' => 'http://192.168.0.102/menu-order?table=1',
+                'code' => 'XYZ12',
+                'web_page' => 'http://192.168.0.102/menu-order?table=XYZ12',
                 'is_active' => true,
             ],
             [
                 'number' => 2,
-                'web_page' => 'http://192.168.0.102/menu-order?table=2',
+                'code' => 'YXZ21',
+                'web_page' => 'http://192.168.0.102/menu-order?table=YXZ21',
                 'is_active' => true,
             ],
             [
                 'number' => 3,
-                'web_page' => 'http://192.168.0.102/menu-order?table=3',
+                'code' => 'CD87K',
+                'web_page' => 'http://192.168.0.102/menu-order?table=CD87K',
                 'is_active' => true,
             ],
             [
                 'number' => 4,
-                'web_page' => 'http://192.168.0.102/menu-order?table=4',
+                'code' => 'LKN23',
+                'web_page' => 'http://192.168.0.102/menu-order?table=LKN23',
                 'is_active' => true,
             ],
             [
                 'number' => 5,
-                'web_page' => 'http://192.168.0.102/menu-order?table=5',
+                'code' => '9K3N8',
+                'web_page' => 'http://192.168.0.102/menu-order?table=9K3N8',
                 'is_active' => true,
             ],
         ];
@@ -328,6 +340,7 @@ class SeedAllDataCommand extends Command
         foreach ($tables as $table) {
             Rtable::create([
                 'number' => $table['number'],
+                'code' => $table['code'],
                 'web_page' => $table['web_page'],
                 'is_active' => $table['is_active'],
             ]);

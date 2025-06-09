@@ -21,23 +21,39 @@ class RtableResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    public static function canAccess(): bool
-    {
-        return auth()->user()->hasPermission('article_table_admin');
-    }
-
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('number')
-                    //->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('web_page')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\Toggle::make('is_active')
-                    ->required(),
+                Forms\Components\Section::make('Table Information')
+                ->schema([
+                    Forms\Components\TextInput::make('number')
+                        ->label('Table Number')
+                        ->required()
+                        ->numeric()
+                        ->minValue(1)
+                        ->unique(table: 'rtables', column: 'number', ignoreRecord: true),
+                    Forms\Components\TextInput::make('code')
+                        ->label('Table Code')
+                        ->default(function () {
+                            $letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                            do {
+                                $code = substr(str_shuffle($letters), 0, 5);
+                            } while (\App\Models\Rtable::where('code', $code)->exists());
+                            return $code;
+                        })
+                        ->unique(table: 'rtables', column: 'code', ignoreRecord: true)
+                        ->readOnly()
+                        ->required(),
+                    Forms\Components\TextInput::make('web_page')
+                        ->required()
+                        ->maxLength(255),
+                    Forms\Components\Toggle::make('is_active')
+                        ->onColor('success')
+                        ->offColor('danger')
+                        ->inline(false)
+                        ->required(),
+                ])
             ]);
     }
 
@@ -51,6 +67,7 @@ class RtableResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('web_page'),
                    // ->searchable(),
+                Tables\Columns\TextColumn::make('code'),
                 Tables\Columns\ToggleColumn::make('is_active')
                     ->onIcon('heroicon-m-user')
                     ->offIcon('heroicon-m-user')
@@ -119,4 +136,10 @@ class RtableResource extends Resource
             'qr-code' => Pages\ViewQrCode::route('/{record}/qr-code'),
         ];
     }
+
+    public static function canAccess(): bool
+    {
+        return auth()->user()->role && auth()->user()->role->name === 'manager' && auth()->user()->hasPermission('article_table_admin');
+    }
+
 }

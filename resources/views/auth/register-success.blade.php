@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Uspešna Registracija</title>
+    <title>Uspješna Registracija</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -57,7 +57,7 @@
 </head>
 <body>
 <div class="success-container">
-    <p style="color: green">Uspešno ste se registrovali!</p>
+    <p style="color: green">Uspješno ste se registrovali!</p>
     <p>Vaš licencni ključ je: <span class="license-key">{{ $licenseKey }}</span></p>
     <p>Proslijedite ovaj ključ administratoru.</p>
 </div>

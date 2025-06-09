@@ -8,12 +8,11 @@ use App\Models\Category;
 use App\Models\Article;
 use App\Models\Order;
 use App\Models\OrderItem;
-
 use Livewire\WithPagination;
+
 
 class CategoryArticles extends Component
 {
-
     use WithPagination;
     public $categories;
     public $selectedCategory = null;
@@ -29,30 +28,30 @@ class CategoryArticles extends Component
     public int $table = 1;
     public int $quantity = 1;
 
+    public $extras = [];
+
     public $dbOrder;
-    //public OrderItem $dbOrderItem;
-
     public $i = 0;
-
-    //Total = tatal cost of order
-
     public float $total = 0;
-
     public int $inputValue = 0;
-
     public $orderItem;
-
     public $selectedArticle = null;
-
     protected $listeners = ['cancelOrder'];
 
     public function mount()
     {
         $this->categories = Category::all();
-       // $this->articles = Category::find(1)->article;
         $this->selectedCategory = 1;
         $this->orderList = collect();
-        $this->table = request()->table;
+
+        $this->tableCode = request()->query('table');
+        $rtable = Rtable::where('code', $this->tableCode)->first();
+
+        if (!$rtable || !$rtable->is_active) {
+            abort(404, 'Invalid or inactive table code.');
+        }
+
+        $this->table = $rtable->number;
 
         $this->orderItem = json_encode(OrderItem::where('order_id','55')->get());
     }
@@ -92,6 +91,9 @@ class CategoryArticles extends Component
                 //$this->order->put($row['id']);
                 //$this->order->put($row['title']);
                 //if(!collect($this->order)->contains('id', $rowId))
+                $extrasForArticleRaw = $this->extras[$rowId] ?? [];
+                $extrasForArticle = array_keys(array_filter($extrasForArticleRaw));
+
                 $this->order[] = collect([
                     'id' => $this->i,
                     'article_id' => $this->niz[0]['id'],
@@ -101,13 +103,15 @@ class CategoryArticles extends Component
                     'printer' => Article::find($this->niz[0]['id'])->printer->pluck('mac_address')[0],
                     'table' => $this->table,
                     'quantity' => $this->quantity,
-                    'total' => $this->total
+                    'total' => $this->total,
+                    'extras' => $extrasForArticle,
                 ]);
                 $this->i+=1;
                 $this->niz = [];
                 //$this->order[0]['quantity']+=1;
 
                 $this->total();
+                unset($this->extras[$rowId]);
             }
             else
                 $this->total();
@@ -119,12 +123,12 @@ class CategoryArticles extends Component
     public function total()
     {
         foreach($this->order as $article)
-            {
-                $this->total += $article['price']*$article['quantity'];
-            }
+        {
+            $this->total += $article['price']*$article['quantity'];
+        }
     }
 
-    //Function for adding orders into DB
+//Function for adding orders into DB
     public function naruciHranu()
     {
         if(!empty($this->order))
@@ -165,9 +169,15 @@ class CategoryArticles extends Component
                     'quantity' => $article['quantity'],
                     'table' => $this->table,
                     'total' => $this->total,
-                    'printer' => $article['printer']
+                    'printer' => $article['printer'],
+                    'extras' => json_encode($article['extras'])
                 ]);
             }
+
+            $orderJson = json_encode($this->order, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            $escapedJson = escapeshellarg($orderJson);
+
+            exec("python3 app/Scripts/print_order_script.py $escapedJson > /dev/null 2>/dev/null &");
 
             $this->order = [];
             $this->i = 0;
@@ -329,5 +339,5 @@ class CategoryArticles extends Component
             'total' => $this->total,
         ])->layout('layouts.app');
     }
-
 }
+

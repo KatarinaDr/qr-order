@@ -18,6 +18,10 @@ class CheckUserLicense
     {
         $user = Auth::user();
 
+        if ($user->role === 'super_admin') {
+            return $next($request);
+        }
+
         if (!$user || !$user->is_active || ($user->license_expires_at && $user->license_expires_at->isPast())) {
             Auth::logout();
             return redirect()->route('license.expired');

@@ -17,12 +17,7 @@ class CategoryResource extends Resource
 {
     protected static ?string $model = Category::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
-/*    public static function canAccess(): bool
-    {
-        return auth()->user()->hasPermission('category_printer_admin');
-    } */
+    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
 
     public static function form(Form $form): Form
     {
@@ -85,4 +80,9 @@ class CategoryResource extends Resource
             'edit' => Pages\EditCategory::route('/{record}/edit'),
         ];
     }
+
+    /*public static function canAccess(): bool
+    {
+        return auth()->user()->role && auth()->user()->role->name === 'manager' && auth()->user()->hasPermission('category_printer_admin');
+    }*/
 }

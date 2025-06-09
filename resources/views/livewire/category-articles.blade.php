@@ -1,8 +1,10 @@
+@php use Illuminate\Support\Str; @endphp
+
 <div>
     <div class="top-bar">
         <button class="menu-toggle" onclick="toggleMenu()">☰</button>
         <div class="welcome-container">
-            <b><p class="welcome-text">Dobrodošli u Pub Klek!</p></b>
+            <p class="welcome-text"><b>Dobrodošli u {{ \App\Models\Setting::get('company_name', 'Lokal') }}!</b></p>
         </div>
     </div>
 
@@ -29,13 +31,32 @@
                             <div class="article-card-header" wire:click="showArticle({{ $article->id }})" style="cursor: pointer;">
                                 {{ $article->title }}
                             </div>
-                            <div class="article-card-body">
-                                <img src="{{ asset($article->image_url) }}" alt="{{ $article->title }}" style="width: 100px; height: 100px; border-radius: 30px; margin-bottom: 10px; cursor: pointer" wire:click="showArticle({{ $article->id }})">
-                                <input style="border-radius: 40px; margin-bottom: 10px; border-color: black; border-width: 1px; width:100px; height: 30px; padding-left: 10px;" placeholder="Napomena:">
-                                <div class="price">
-                                    <b>{{ Str::limit($article->price) }} KM</b>
-                                </div>
+                        <div class="article-card-body">
+{{--                            <img src="{{ asset($article->image_url) }}" alt="{{ $article->title }}" style="width: 100px; height: 100px; border-radius: 30px; margin-bottom: 10px; cursor: pointer" wire:click="showArticle({{ $article->id }})">--}}
+                            <img src="{{ asset('storage/' . $article->image_url) }}" alt="{{ $article->title }}" />
+                            <input style="border-radius: 40px; margin-bottom: 10px; border-color: black; border-width: 1px; width:100px; height: 30px; padding-left: 10px;" placeholder="Napomena:">
+                            <div>
+                                @if($article->tags)
+                                    <div class="extras" style="margin-bottom: 10px;">
+                                        @foreach($article->tags as $extra)
+                                            @php
+                                                $slug = Str::slug($extra['name'], '_');
+                                                $value = $extra['name'];
+                                            @endphp
+                                            <label style="display: block; font-size: 14px; text-align: start">
+                                                <input type="checkbox"
+                                                       wire:model.defer="extras.{{ $article->id }}.{{ $slug }}"
+                                                       value="{{ $value }}">
+                                                {{ $extra['name'] }}
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                @endif
                             </div>
+                            <div class="price">
+                                <b>{{ Str::limit($article->price) }} KM</b>
+                            </div>
+                        </div>
                         <div class="article-card-footer">
                             <button class="card-button" wire:click="addToDestination({{ $article->id }})"><b>+</b></button>
                         </div>

@@ -4,6 +4,7 @@ namespace App\Filament\Widgets;
 
 use App\Models\Article;
 use App\Models\Rtable;
+use App\Models\User;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use DateTime;
@@ -17,27 +18,34 @@ class OverviewWidget extends BaseWidget
 //        $monthlyOfsBusinessLocationCounts = $this->getMonthlyCounts(OfsBusinessLocation::class);
 //        $monthlyOfsBusinessLocationDeviceCounts = $this->getMonthlyCounts(OfsBusinessLocationDevice::class);
 
-        $dailyArticlesCounts = $this->getDailyCounts(Article::class);
-        $dailyTablesCounts = $this->getDailyCounts(Rtable::class);
+        $user = Auth::user();
+        $stats = [];
 
-        $stats = [
-            Stat::make('Broj artikala:', Article::count())
+        if ($user && $user->role && $user->role->name === 'super_admin'){
+            $stats[] = Stat::make('Broj korisnika:', User::count() - 1)
+                ->description('Ukupan broj korisnika')
+                ->color('primary')
+                ->icon('heroicon-o-users');
+        }
+
+        if ($user && $user->role && $user->role->name === 'manager'){
+            $dailyArticlesCounts = $this->getDailyCounts(Article::class);
+            $dailyTablesCounts = $this->getDailyCounts(Rtable::class);
+
+            $stats[] = Stat::make('Broj artikala:', Article::count())
                 ->description('Artikli')
                 ->color('success')
                 ->icon('heroicon-o-shopping-bag')
                 ->chart($dailyArticlesCounts)
-                ->chartColor('success'),
+                ->chartColor('success');
 
-            Stat::make('Broj stolova:', Rtable::count())
+            $stats[] = Stat::make('Broj stolova:', Rtable::count())
                 ->description('Stolovi')
                 ->color('info')
                 ->icon('heroicon-o-building-office')
                 ->chart($dailyTablesCounts)
-                ->chartColor('info'),
-        ];
+                ->chartColor('info');
 
-        $user = Auth::user();
-        if ($user && $user->role && $user->role->name !== 'super_admin') {
             $stats[] = $this->getLicenseStat();
         }
 
