@@ -33,7 +33,7 @@
                             </div>
                         <div class="article-card-body">
 {{--                            <img src="{{ asset($article->image_url) }}" alt="{{ $article->title }}" style="width: 100px; height: 100px; border-radius: 30px; margin-bottom: 10px; cursor: pointer" wire:click="showArticle({{ $article->id }})">--}}
-                            <img src="{{ asset('storage/' . $article->image_url) }}" alt="{{ $article->title }}" />
+                            <img src="{{ asset('storage/' . $article->image_url) }}" alt="{{ $article->title }}" wire:click="showArticle({{ $article->id }})" style="cursor: pointer;" />
                             <input style="border-radius: 40px; margin-bottom: 10px; border-color: black; border-width: 1px; width:100px; height: 30px; padding-left: 10px;" placeholder="Napomena: " wire:model="notes.{{ $article->id }}">
                             <div>
                                 @if($article->tags)
@@ -54,7 +54,7 @@
                                     </div>
                                 @endif
                             </div>
-                            <div class="price">
+                            <div class="price" wire:click="showArticle({{ $article->id }})" style="cursor: pointer;">
                                 <b>{{ Str::limit($article->price) }} KM</b>
                             </div>
                         </div>
