@@ -1,5 +1,5 @@
 <?php
-
+/*
 namespace App\Filament\Pages;
 
 use Filament\Forms;
@@ -15,23 +15,16 @@ class Settings extends Page
     protected static ?string $title = 'Settings';
     protected static string $view = 'filament.pages.settings';
 
-    public ?array $data = [];
+    public $company_name;
+    public $session;
 
     public function mount(): void
     {
-        $this->loadFormData();
-    }
-
-    protected function loadFormData(): void
-    {
         $this->form->fill([
-            'company_name' => Setting::get('company_name'),
-            'email' => Setting::get('email'),
-            'phone' => Setting::get('phone'),
-            'articles' => [],
+            'company_name' => Setting::get('company_name', 'Lokal'),
+            'session' => Setting::get('session', 300),
         ]);
     }
-
 
     protected function getFormSchema(): array
     {
@@ -44,19 +37,13 @@ class Settings extends Page
                                 ->label('Naziv lokala')
                                 ->prefixIcon('heroicon-o-home-modern')
                                 ->required(),
-                            Forms\Components\TextInput::make('email')
-                                ->label('Trajanje sesije')
+                            Forms\Components\TextInput::make('session')
+                                ->label('Trajanje sesije (minute)')
                                 ->prefixIcon('heroicon-o-clock')
-                                ->required(),
-                            Forms\Components\Section::make('Pozadina')
-                                ->schema([
-                                    Forms\Components\TextInput::make('color')
-                                        ->label('Boja pozadine')
-                                        ->prefixIcon('heroicon-o-photo'),
-                                    Forms\Components\FileUpload::make('photo')
-                                        ->label('Slika pozadine')
-                                        ->image(),
-                                ]),
+                                ->required()
+                                ->numeric()
+                                ->minValue(1)
+                                ->helperText('Unesite trajanje sesije u minutama (npr. 5 za 5 minuta).'),
                         ]),
                 ]),
         ];
@@ -76,8 +63,12 @@ class Settings extends Page
             ->success()
             ->send();
 
-        $this->form->fill();
+        $this->form->fill($data);
     }
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()->role && auth()->user()->role->name === 'manager' && auth()->user()->hasPermission('article_table_admin');
+    }
 
-}
+}*/

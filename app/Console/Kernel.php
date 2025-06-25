@@ -27,8 +27,4 @@ class Kernel extends ConsoleKernel
 
         require base_path('routes/console.php');
     }
-
-    protected $routeMiddleware = [
-        'check.qr.session' => \App\Http\Middleware\CheckQrSession::class,
-    ];
 }

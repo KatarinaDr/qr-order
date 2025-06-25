@@ -4,7 +4,7 @@
     <div class="top-bar">
         <button class="menu-toggle" onclick="toggleMenu()">☰</button>
         <div class="welcome-container">
-            <p class="welcome-text"><b>Dobrodošli u {{ \App\Models\Setting::get('company_name', 'Lokal') }}!</b></p>
+            <p class="welcome-text"><b>Dobrodošli u Pub Klek!</b></p>
         </div>
     </div>
 
@@ -34,7 +34,7 @@
                         <div class="article-card-body">
 {{--                            <img src="{{ asset($article->image_url) }}" alt="{{ $article->title }}" style="width: 100px; height: 100px; border-radius: 30px; margin-bottom: 10px; cursor: pointer" wire:click="showArticle({{ $article->id }})">--}}
                             <img src="{{ asset('storage/' . $article->image_url) }}" alt="{{ $article->title }}" />
-                            <input style="border-radius: 40px; margin-bottom: 10px; border-color: black; border-width: 1px; width:100px; height: 30px; padding-left: 10px;" placeholder="Napomena:">
+                            <input style="border-radius: 40px; margin-bottom: 10px; border-color: black; border-width: 1px; width:100px; height: 30px; padding-left: 10px;" placeholder="Napomena: " wire:model="notes.{{ $article->id }}">
                             <div>
                                 @if($article->tags)
                                     <div class="extras" style="margin-bottom: 10px;">
@@ -43,10 +43,11 @@
                                                 $slug = Str::slug($extra['name'], '_');
                                                 $value = $extra['name'];
                                             @endphp
-                                            <label style="display: block; font-size: 14px; text-align: start">
+                                            <label style="display: flex; align-items: center; font-size: 10px; text-align: start;">
                                                 <input type="checkbox"
                                                        wire:model.defer="extras.{{ $article->id }}.{{ $slug }}"
-                                                       value="{{ $value }}">
+                                                       value="{{ $value }}"
+                                                       style="width: 15px; height: 15px; margin-right: 5px;">
                                                 {{ $extra['name'] }}
                                             </label>
                                         @endforeach
@@ -121,6 +122,18 @@
 
         if (leftMenu.classList.contains('open') && !isClickInsideMenu && !isClickOnToggle) {
             leftMenu.classList.remove('open');
+        }
+    });
+
+    Livewire.on('reset-checkboxes', (event) => {
+        const articleId = event.articleId;
+        const checkboxes = document.querySelectorAll(`input[wire\\:model\\.defer="extras.${articleId}"]`);
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = false;
+        });
+        const noteInput = document.querySelector(`input[wire\\:model\\.defer="notes.${articleId}"]`);
+        if (noteInput) {
+            noteInput.value = '';
         }
     });
 </script>

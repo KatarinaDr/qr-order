@@ -9,6 +9,9 @@ use App\Models\Article;
 use App\Models\Order;
 use App\Models\OrderItem;
 use Livewire\WithPagination;
+use App\Models\Setting;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Redirect;
 
 
 class CategoryArticles extends Component
@@ -29,6 +32,7 @@ class CategoryArticles extends Component
     public int $quantity = 1;
 
     public $extras = [];
+    public $notes = [];
 
     public $dbOrder;
     public $i = 0;
@@ -77,54 +81,99 @@ class CategoryArticles extends Component
         // You can perform other actions here
     }
 
-    public function addToDestination($rowId)
+    /*public function addToDestination($rowId)
     {
         $this->total = 0;
-
-        // Find the row by ID
         $row = Article::find($rowId);
 
         if ($row) {
-            // Add the row to the destination table if not already added
-            if (!collect($this->order)->contains('article_id', $rowId)) {
-                $this->niz[] = $row;
-                //$this->order->put($row['id']);
-                //$this->order->put($row['title']);
-                //if(!collect($this->order)->contains('id', $rowId))
-                $extrasForArticleRaw = $this->extras[$rowId] ?? [];
-                $extrasForArticle = array_keys(array_filter($extrasForArticleRaw));
+            $extrasForArticleRaw = $this->extras[$rowId] ?? [];
+            $extrasForArticleNames = array_keys(array_filter($extrasForArticleRaw));
+            $note = $this->notes[$rowId] ?? '';
 
+            $existingOrderItemIndex = collect($this->order)->search(function ($item) use ($rowId) {
+                return $item['article_id'] == $rowId;
+            });
+
+            if ($existingOrderItemIndex !== false) {
+                $this->order[$existingOrderItemIndex]['quantity'] += $this->quantity;
+                $this->order[$existingOrderItemIndex]['extras'] = array_unique(array_merge(
+                    $this->order[$existingOrderItemIndex]['extras'],
+                    $extrasForArticleNames
+                ));
+                if (!empty($note)) {
+                    $this->order[$existingOrderItemIndex]['note'] = $note;
+                }
+            } else {
+                $this->niz[] = $row;
                 $this->order[] = collect([
                     'id' => $this->i,
                     'article_id' => $this->niz[0]['id'],
                     'title' => $this->niz[0]['title'],
                     'price' => $this->niz[0]['price'],
                     'image_url' => $this->niz[0]['image_url'],
-                    'printer' => Article::find($this->niz[0]['id'])->printer->pluck('mac_address')[0],
+                    'printer' => Article::find($this->niz[0]['id'])->printer->pluck('mac_address')[0] ?? null,
                     'table' => $this->table,
                     'quantity' => $this->quantity,
                     'total' => $this->total,
-                    'extras' => $extrasForArticle,
+                    'extras' => $extrasForArticleNames,
+                    'note' => $note,
                 ]);
-                $this->i+=1;
+                $this->i++;
                 $this->niz = [];
-                //$this->order[0]['quantity']+=1;
-
-                $this->total();
-                unset($this->extras[$rowId]);
             }
-            else
-                $this->total();
-        }
-        else
+
+            unset($this->extras[$rowId]);
+            unset($this->notes[$rowId]);
+            $this->dispatch('reset-checkboxes', articleId: $rowId);
+
             $this->total();
+        } else {
+            $this->total();
+        }
+    }*/
+
+    public function addToDestination($rowId)
+    {
+        $this->total = 0;
+        $row = Article::find($rowId);
+
+        if ($row) {
+            $extrasForArticleRaw = $this->extras[$rowId] ?? [];
+            $extrasForArticleNames = array_keys(array_filter($extrasForArticleRaw));
+            $note = $this->notes[$rowId] ?? '';
+
+            $this->order[] = collect([
+                'id' => $this->i,
+                'article_id' => $row->id,
+                'title' => $row->title,
+                'price' => $row->price,
+                'image_url' => $row->image_url,
+                'printer' => $row->printer->pluck('mac_address')[0] ?? null,
+                'table' => $this->table,
+                'quantity' => $this->quantity,
+                'total' => $this->total,
+                'extras' => $extrasForArticleNames,
+                'note' => $note,
+            ]);
+
+            $this->i++;
+
+            unset($this->extras[$rowId]);
+            unset($this->notes[$rowId]);
+            $this->dispatch('reset-checkboxes', articleId: $rowId);
+
+            $this->total();
+        } else {
+            $this->total();
+        }
     }
 
     public function total()
     {
-        foreach($this->order as $article)
-        {
-            $this->total += $article['price']*$article['quantity'];
+        $this->total = 0;
+        foreach ($this->order as $article) {
+            $this->total += $article['price'] * $article['quantity'];
         }
     }
 
@@ -170,7 +219,8 @@ class CategoryArticles extends Component
                     'table' => $this->table,
                     'total' => $this->total,
                     'printer' => $article['printer'],
-                    'extras' => json_encode($article['extras'])
+                    'extras' => json_encode($article['extras'], JSON_UNESCAPED_UNICODE),
+                    'note' => $article['note'] ?? '',
                 ]);
             }
 

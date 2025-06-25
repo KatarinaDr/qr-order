@@ -20,10 +20,12 @@ class OrderItem extends Model
         'printer',
         'total',
         'quantity',
+        'extras',
+        'note',
     ];
 
     protected $casts = [
-    
+
     ];
 
     public function order(): BelongsTo

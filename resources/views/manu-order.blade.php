@@ -15,9 +15,10 @@
     <!-- Custom Styles -->
     <style>
         body {
-            background-image: url({{ asset('images/klek.jpg') }});
-            background-size: cover;
-            background-attachment: fixed;
+            {{--background-image: url({{ asset('images/klek.jpg') }});--}}
+            /*background-size: cover;*/
+            /*background-attachment: fixed;*/
+            background: linear-gradient(to top, #7f1d1d, #1a202c);
             color: #ffffff;
             margin: 0;
             font-family: Grenze, serif;
@@ -371,7 +372,7 @@
         }
 
         .custom-table tbody tr:hover {
-            background-color: #333333;
+            /*background-color: #333333;*/
         }
 
         .custom-table tbody tr:last-child td {

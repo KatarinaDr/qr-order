@@ -3,7 +3,6 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\CategoryResource\Pages;
-use App\Filament\Resources\CategoryResource\RelationManagers;
 use App\Models\Category;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -81,8 +80,8 @@ class CategoryResource extends Resource
         ];
     }
 
-    /*public static function canAccess(): bool
+    public static function canAccess(): bool
     {
-        return auth()->user()->role && auth()->user()->role->name === 'manager' && auth()->user()->hasPermission('category_printer_admin');
-    }*/
+        return auth()->user()->role && auth()->user()->role->name === 'manager' && auth()->user()->hasPermission('article_table_admin');
+    }
 }

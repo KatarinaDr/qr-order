@@ -75,7 +75,7 @@ class User extends Authenticatable
     {
         static::saving(function ($user) {
             if ($user->isDirty('is_active') && $user->is_active === true) {
-                $user->license_expires_at = now()->addDays(1);
+                $user->license_expires_at = now()->addSeconds(40);
             }
 
             if ($user->is_active && $user->license_expires_at && $user->license_expires_at->isPast()) {

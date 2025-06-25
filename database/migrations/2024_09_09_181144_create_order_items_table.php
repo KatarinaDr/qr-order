@@ -23,6 +23,7 @@ return new class extends Migration
             $table->float('total')->nullable();
             $table->integer('quantity');
             $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade');
+            $table->text('note')->nullable();
             $table->timestamps();
         });
     }
