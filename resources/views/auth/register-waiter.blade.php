@@ -92,12 +92,6 @@
             background-color: #3b46a1;
         }
 
-        /* Forgot password link */
-        .forgot-password {
-            text-align: center;
-            margin-top: 1.25rem;
-        }
-
         .forgot-password a {
             color: #4e52c8;
             text-decoration: none;
@@ -129,9 +123,9 @@
 <body>
 
 <div class="register-container">
-    <h2>Registracija menadzera</h2>
+    <h2>Registracija konobara</h2>
 
-    <form method="POST" action="{{ route('register') }}">
+    <form method="POST" action="{{ route('register.waiter.submit') }}">
         @csrf
 
         <div class="form-group">
@@ -146,15 +140,6 @@
             <label for="email">Email</label>
             <input id="email" type="email" name="email" value="{{ old('email') }}" required>
             @error('email')
-            <div class="error">{{ $message }}</div>
-            @enderror
-        </div>
-
-        <div class="form-group">
-            <label for="license_key">Licencni Ključ</label>
-            <input id="license_key" type="text" name="license_key" value="{{ $licenseKey }}" disabled>
-            <input type="hidden" name="license_key" value="{{ $licenseKey }}">
-            @error('license_key')
             <div class="error">{{ $message }}</div>
             @enderror
         </div>

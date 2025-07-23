@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registracija</title>
+    <title>Log In</title>
     <style>
-        /* Global reset */
         * {
             margin: 0;
             padding: 0;
@@ -22,8 +21,7 @@
             color: #333;
         }
 
-        /* Register container styling */
-        .register-container {
+        .login-container {
             background-color: #ffffff;
             padding: 2.5rem;
             border-radius: 10px;
@@ -40,11 +38,6 @@
             color: #4e52c8;
             margin-bottom: 1.5rem;
             font-weight: 600;
-        }
-
-        /* Form Group styling */
-        .form-group {
-            margin-bottom: 1.5rem;
         }
 
         label {
@@ -70,12 +63,6 @@
             box-shadow: 0 0 5px rgba(78, 82, 200, 0.3);
         }
 
-        .error {
-            color: #e74c3c;
-            font-size: 0.875rem;
-            margin-top: 0.25rem;
-        }
-
         button {
             width: 100%;
             padding: 1rem;
@@ -90,19 +77,6 @@
 
         button:hover {
             background-color: #3b46a1;
-        }
-
-        /* Forgot password link */
-        .forgot-password {
-            text-align: center;
-            margin-top: 1.25rem;
-        }
-
-        .forgot-password a {
-            color: #4e52c8;
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.3s ease-in-out;
         }
 
         .forgot-password a:hover {
@@ -128,53 +102,39 @@
 </head>
 <body>
 
-<div class="register-container">
-    <h2>Registracija menadzera</h2>
+<div class="login-container">
+    <h2>Log In</h2>
 
-    <form method="POST" action="{{ route('register') }}">
+    <form method="POST" action="{{ route('login.submit') }}">
         @csrf
-
-        <div class="form-group">
-            <label for="name">Ime</label>
-            <input id="name" type="text" name="name" value="{{ old('name') }}" required autofocus>
-            @error('name')
-            <div class="error">{{ $message }}</div>
-            @enderror
-        </div>
-
-        <div class="form-group">
-            <label for="email">Email</label>
-            <input id="email" type="email" name="email" value="{{ old('email') }}" required>
+        <div>
+            <label for="email">Email:</label><br>
+            <input type="email" id="email" name="email" required>
             @error('email')
-            <div class="error">{{ $message }}</div>
+            <div style="color: red">{{ $message }}</div>
             @enderror
         </div>
 
-        <div class="form-group">
-            <label for="license_key">Licencni Ključ</label>
-            <input id="license_key" type="text" name="license_key" value="{{ $licenseKey }}" disabled>
-            <input type="hidden" name="license_key" value="{{ $licenseKey }}">
-            @error('license_key')
-            <div class="error">{{ $message }}</div>
-            @enderror
-        </div>
-
-        <div class="form-group">
-            <label for="password">Lozinka</label>
-            <input id="password" type="password" name="password" required>
+        <div>
+            <label for="password">Lozinka:</label><br>
+            <input type="password" id="password" name="password" required>
             @error('password')
-            <div class="error">{{ $message }}</div>
+            <div style="color: red">{{ $message }}</div>
             @enderror
         </div>
 
-        <div class="form-group">
-            <label for="password_confirmation">Potvrda Lozinke</label>
-            <input id="password_confirmation" type="password" name="password_confirmation" required>
+        <div style="margin-top: 15px;">
+            <button type="submit">Prijavi se</button>
         </div>
-
-        <button type="submit">Registruj se</button>
     </form>
+
+    <div style="margin-top: 15px;">
+        <form method="GET" action="{{ route('register.waiter') }}">
+            <button type="submit">Registruj se</button>
+        </form>
+    </div>
 </div>
+
 
 </body>
 </html>

@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules;
+use App\Models\Waiter;
 
 class RegisterController extends Controller
 {
@@ -56,4 +57,28 @@ class RegisterController extends Controller
 
         return $key;
     }
+
+    public function registerWaiter()
+    {
+        return view('auth.register-waiter');
+    }
+
+    public function registerWaiterPost(Request $request)
+    {
+        $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:waiters,email'],
+            'password' => ['required', 'confirmed', \Illuminate\Validation\Rules\Password::defaults()],
+        ]);
+
+        Waiter::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => \Illuminate\Support\Facades\Hash::make($request->password),
+        ]);
+
+        return redirect()->route('login')->with('success', 'Konobar je uspješno registrovan.');
+    }
+
+
 }

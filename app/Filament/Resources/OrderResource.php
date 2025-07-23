@@ -27,12 +27,12 @@ class OrderResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('customer')
+                /*Forms\Components\TextInput::make('waiter')
                     ->maxLength(255),
                 Forms\Components\TextInput::make('table')
                     ->numeric(),
                 Forms\Components\TextInput::make('total')
-                    ->numeric(),
+                    ->numeric(),*/
             ]);
     }
 
@@ -40,7 +40,8 @@ class OrderResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('customer')
+                Tables\Columns\TextColumn::make('waiter.name')
+                    ->label('Waiter')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('table')
                     ->numeric()
@@ -71,13 +72,11 @@ class OrderResource extends Resource
             ])
             ->headerActions([
                 // ...
-                Tables\Actions\Action::make('Download')
+                /*Tables\Actions\Action::make('Download')
                     ->label('PDF')
                     ->color('success')
                     ->icon('heroicon-o-document')
-                    ->action(fn() => static::downloadTxt()),
-
-
+                    ->action(fn() => static::downloadTxt()),*/
             ]);
     }
 

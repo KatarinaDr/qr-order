@@ -85,4 +85,9 @@ class User extends Authenticatable
         });
     }
 
+    public function waiter()
+    {
+        return $this->belongsTo(\App\Models\Waiter::class);
+    }
+
 }

@@ -3,9 +3,15 @@
 <div>
     <div class="top-bar">
         <button class="menu-toggle" onclick="toggleMenu()">☰</button>
-        <div class="welcome-container">
+
+        <div class="center-text">
             <p class="welcome-text"><b>Dobrodošli u Pub Klek!</b></p>
         </div>
+
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit" class="logout-button">Sign out</button>
+        </form>
     </div>
 
     <div class="main">
@@ -70,6 +76,11 @@
             </div>
 
             <div class="footer">
+                <div class="buttons">
+                    <button class="all-orders"><b>📝 Sve narudzbe</b></button>
+                    <button type="button" class="lock-table" wire:click="lockTable"><b>🔒 Zakljuci sto</b></button>
+                </div>
+
                 <h3>Vaša korpa:</h3><br>
 
                 <table class="custom-table">

@@ -9,9 +9,8 @@ use App\Models\Article;
 use App\Models\Order;
 use App\Models\OrderItem;
 use Livewire\WithPagination;
-use App\Models\Setting;
-use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Waiter;
 
 
 class CategoryArticles extends Component
@@ -42,8 +41,17 @@ class CategoryArticles extends Component
     public $selectedArticle = null;
     protected $listeners = ['cancelOrder'];
 
+    public $waiter;
+
+
     public function mount()
     {
+        $this->waiter = auth()->guard('waiter')->user();
+
+        if (!$this->waiter) {
+            abort(403, 'Access restricted to authenticated waiters.');
+        }
+
         $this->categories = Category::all();
         $this->selectedCategory = 1;
         $this->orderList = collect();
@@ -59,6 +67,7 @@ class CategoryArticles extends Component
 
         $this->orderItem = json_encode(OrderItem::where('order_id','55')->get());
     }
+
 
     public function showArticle($articleId)
     {
@@ -80,58 +89,6 @@ class CategoryArticles extends Component
         $this->result = $this->inputValue * 2;
         // You can perform other actions here
     }
-
-    /*public function addToDestination($rowId)
-    {
-        $this->total = 0;
-        $row = Article::find($rowId);
-
-        if ($row) {
-            $extrasForArticleRaw = $this->extras[$rowId] ?? [];
-            $extrasForArticleNames = array_keys(array_filter($extrasForArticleRaw));
-            $note = $this->notes[$rowId] ?? '';
-
-            $existingOrderItemIndex = collect($this->order)->search(function ($item) use ($rowId) {
-                return $item['article_id'] == $rowId;
-            });
-
-            if ($existingOrderItemIndex !== false) {
-                $this->order[$existingOrderItemIndex]['quantity'] += $this->quantity;
-                $this->order[$existingOrderItemIndex]['extras'] = array_unique(array_merge(
-                    $this->order[$existingOrderItemIndex]['extras'],
-                    $extrasForArticleNames
-                ));
-                if (!empty($note)) {
-                    $this->order[$existingOrderItemIndex]['note'] = $note;
-                }
-            } else {
-                $this->niz[] = $row;
-                $this->order[] = collect([
-                    'id' => $this->i,
-                    'article_id' => $this->niz[0]['id'],
-                    'title' => $this->niz[0]['title'],
-                    'price' => $this->niz[0]['price'],
-                    'image_url' => $this->niz[0]['image_url'],
-                    'printer' => Article::find($this->niz[0]['id'])->printer->pluck('mac_address')[0] ?? null,
-                    'table' => $this->table,
-                    'quantity' => $this->quantity,
-                    'total' => $this->total,
-                    'extras' => $extrasForArticleNames,
-                    'note' => $note,
-                ]);
-                $this->i++;
-                $this->niz = [];
-            }
-
-            unset($this->extras[$rowId]);
-            unset($this->notes[$rowId]);
-            $this->dispatch('reset-checkboxes', articleId: $rowId);
-
-            $this->total();
-        } else {
-            $this->total();
-        }
-    }*/
 
     public function addToDestination($rowId)
     {
@@ -198,13 +155,11 @@ class CategoryArticles extends Component
             Order::create([
                 'customer' => $mac,
                 'table' => $this->table,
-                'total' => $this->total
+                'total' => $this->total,
+                'waiter_id' => $this->waiter->id,
             ]);
 
             $this->dbOrder = Order::latest()->first();
-
-            // Dump the inserted data to check
-            //dd(Order::latest()->first());
 
             $this->dispatch('orderPlaced', 'Order is on the way!');
 
@@ -233,31 +188,6 @@ class CategoryArticles extends Component
             $this->i = 0;
             $this->total = 0;
 
-            //$orderJson = '[{"title": "Article 1", "quantity": 2, "price": 15.00}, {"title": "Article 2", "quantity": 1, "price": 25.00}, {"title": "Article 3", "quantity": 3, "price": 10.00}]';
-
-            // Convert the order array to JSON string
-            //$orderJson = json_encode($this->order, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-
-            /*
-
-            // Escape the JSON string for shell command
-            $escapedOrderJson = escapeshellarg($orderJson);
-
-            try {
-                // Call the Artisan command with the order as an argument
-                Artisan::call('order:print', [
-                    'order' => $orderJson1
-                ]);
-
-                // Optionally, capture the output
-                $output = Artisan::output();
-
-
-            } catch (\Exception $e) {
-                // Flash an error message
-                session()->flash('error', 'Failed to send the order: ' . $e->getMessage());
-            }
-                */
         }
         else
         {
@@ -390,4 +320,3 @@ class CategoryArticles extends Component
         ])->layout('layouts.app');
     }
 }
-

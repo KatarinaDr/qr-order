@@ -25,11 +25,11 @@ class CategoryResource extends Resource
                 Forms\Components\TextInput::make('name')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('description')
+                /*Forms\Components\TextInput::make('description')
                     ->required()
                     ->maxLength(255),
                 Forms\Components\FileUpload::make('image')
-                    ->image(),
+                    ->image(),*/
             ]);
     }
 
@@ -39,9 +39,9 @@ class CategoryResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('description')
+                /*Tables\Columns\TextColumn::make('description')
                     ->searchable(),
-                Tables\Columns\ImageColumn::make('image'),
+                Tables\Columns\ImageColumn::make('image'),*/
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
